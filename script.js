@@ -43,6 +43,11 @@ function genKeyPair() {
         };
 
         keyTextarea.textContent = JSON.stringify(keyPair);
+
+        keyPair = {
+            publicKey: await importKey("jwk", keyPair.publicKey, 0),
+            privateKey: await importKey("jwk", keyPair.privateKey, 1)
+        }
     });
 }
 
