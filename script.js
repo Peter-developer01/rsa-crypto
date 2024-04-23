@@ -13,7 +13,7 @@ const outputTextarea = document.querySelector(".output");
 
 const keys = localStorage.getItem("keys");
 let keyPair;
-if (keys) {
+if (keys && localStorage.getItem("notFirstTimeRSA")) {
     keyTextarea.textContent = keys;
     keyPair = JSON.parse(keys);
     keyPair = {
@@ -22,6 +22,7 @@ if (keys) {
     }
 }
 
+localStorage.setItem("notFirstTimeRSA", "true");
 
 
 function genKeyPair() {
