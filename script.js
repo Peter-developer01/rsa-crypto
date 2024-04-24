@@ -22,6 +22,8 @@ if (keys && localStorage.getItem("notFirstTimeRSA")) {
     }
 }
 
+window.keyPair = keyPair;
+
 localStorage.setItem("notFirstTimeRSA", "true");
 
 
@@ -48,6 +50,8 @@ function genKeyPair() {
             publicKey: await importKey("jwk", keyPair.publicKey, 0),
             privateKey: await importKey("jwk", keyPair.privateKey, 1)
         }
+
+        window.keyPair = keyPair;
     });
 }
 
@@ -61,7 +65,7 @@ async function importKey(name, key, usedFor) {
         key,
         {
             name: "RSA-OAEP",
-            modulusLength: 2048,
+            modulusLength: 4096,
             publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
             hash: {name: "SHA-256"}
         },
@@ -74,8 +78,13 @@ genKeysBtn.addEventListener("click", () => {
     genKeyPair();
 });
 
-saveKeysBtn.addEventListener("click", () => {
-    localStorage.setItem("keys", JSON.stringify(keyPair));
+saveKeysBtn.addEventListener("click", async () => {
+    let k = {
+        privateKey: await exportKey("jwk", keyPair.privateKey, 1),
+        publicKey: await exportKey("jwk", keyPair.publicKey, 0)
+    };
+
+    localStorage.setItem("keys", JSON.stringify(k));
 });
 
 async function encNdec({ target }) {
@@ -83,7 +92,7 @@ async function encNdec({ target }) {
         const message = new TextEncoder().encode(encryptTextarea.value);
         const encrypted = await crypto.subtle.encrypt(
             { name: "RSA-OAEP" }, 
-            await crypto.subtle.importKey("jwk", JSON.parse(theirsPub.value), { name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "SHA-256" } }, false, ["encrypt"]),
+            await crypto.subtle.importKey("jwk", JSON.parse(theirsPub.value), { name: "RSA-OAEP", modulusLength: 4096, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: "SHA-256" } }, false, ["encrypt"]),
             message
         );
         outputTextarea.value = Array.from(new Uint8Array(encrypted)).map(x => x.toString(16)).join("|");
